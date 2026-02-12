@@ -1,16 +1,15 @@
-const express = require("express");
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+import express from "express";
+import fetch from "node-fetch";
 
 const app = express();
-const PORT = 3000;
 
-// Allow CORS
+// Allow CORS so your HTML can fetch from anywhere
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   next();
 });
 
-// Fetch Roblox avatar JSON
+// Endpoint to fetch Roblox avatar by user ID
 app.get("/avatar/:userId", async (req, res) => {
   const userId = req.params.userId;
   try {
@@ -19,12 +18,10 @@ app.get("/avatar/:userId", async (req, res) => {
     );
     const data = await response.json();
 
-    // Check if API returned data
     if (!data.data || !data.data[0]) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Return the JSON
     res.json(data);
   } catch (err) {
     console.error(err);
@@ -32,4 +29,7 @@ app.get("/avatar/:userId", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// ⚠ Use process.env.PORT provided by Cloud Run
+const PORT = process.env.PORT || 8080;
+
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
